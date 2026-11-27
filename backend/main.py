@@ -1,7 +1,10 @@
+
 from datetime import datetime, timezone
+from pathlib import Path
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.staticfiles import StaticFiles
 
 from routes.users import router as users_router
 from routes.markets import router as markets_router
@@ -11,7 +14,7 @@ from routes.wallet import router as wallet_router
 app = FastAPI(
     title="VERIXA EXCHANGE API",
     description="A New Digital Market",
-    version="0.2.0"
+    version="0.3.0"
 )
 
 app.add_middleware(
@@ -22,7 +25,6 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-
 @app.get("/")
 def home():
     return {
@@ -31,9 +33,9 @@ def home():
         "slogan": "A New Digital Market",
         "status": "running",
         "mode": "simulation",
-        "version": "0.2.0"
+        "version": "0.3.0",
+        "website": "/app"
     }
-
 
 @app.get("/health")
 def health():
@@ -43,18 +45,16 @@ def health():
         "timestamp": datetime.now(timezone.utc).isoformat()
     }
 
-
 app.include_router(users_router)
 app.include_router(markets_router)
 app.include_router(orders_router)
 app.include_router(wallet_router)
 
-
 @app.get("/api/v1")
 def api_information():
     return {
         "platform": "VERIXA EXCHANGE",
-        "api_version": "0.2.0",
+        "api_version": "0.3.0",
         "available_modules": [
             "users",
             "markets",
@@ -63,4 +63,13 @@ def api_information():
         ],
         "mode": "simulation"
     }
-    
+
+# Connexion du site web au serveur
+BASE_DIR = Path(__file__).resolve().parent
+FRONTEND_DIR = BASE_DIR.parent / "frontend"
+
+app.mount(
+    "/app",
+    StaticFiles(directory=str(FRONTEND_DIR), html=True),
+    name="frontend"
+)
