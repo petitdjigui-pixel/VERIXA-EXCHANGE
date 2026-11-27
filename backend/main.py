@@ -1,11 +1,17 @@
+from datetime import datetime, timezone
+
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from datetime import datetime, timezone
+
+from routes.users import router as users_router
+from routes.markets import router as markets_router
+from routes.orders import router as orders_router
+from routes.wallet import router as wallet_router
 
 app = FastAPI(
     title="VERIXA EXCHANGE API",
     description="A New Digital Market",
-    version="0.1.0"
+    version="0.2.0"
 )
 
 app.add_middleware(
@@ -16,15 +22,18 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+
 @app.get("/")
 def home():
     return {
         "name": "VERIXA EXCHANGE",
         "symbol": "VRX",
-        "message": "Welcome to a new digital market.",
+        "slogan": "A New Digital Market",
         "status": "running",
-        "mode": "simulation"
+        "mode": "simulation",
+        "version": "0.2.0"
     }
+
 
 @app.get("/health")
 def health():
@@ -34,31 +43,24 @@ def health():
         "timestamp": datetime.now(timezone.utc).isoformat()
     }
 
-@app.get("/api/v1/markets")
-def get_markets():
+
+app.include_router(users_router)
+app.include_router(markets_router)
+app.include_router(orders_router)
+app.include_router(wallet_router)
+
+
+@app.get("/api/v1")
+def api_information():
     return {
-        "mode": "simulation",
-        "markets": [
-            {
-                "id": "COMPUTE",
-                "name": "Computing Capacity",
-                "status": "development"
-            },
-            {
-                "id": "STORAGE",
-                "name": "Digital Storage",
-                "status": "development"
-            },
-            {
-                "id": "NETWORK",
-                "name": "Network Capacity",
-                "status": "development"
-            },
-            {
-                "id": "DATA",
-                "name": "Data Processing",
-                "status": "development"
-            }
-        ]
+        "platform": "VERIXA EXCHANGE",
+        "api_version": "0.2.0",
+        "available_modules": [
+            "users",
+            "markets",
+            "orders",
+            "wallet"
+        ],
+        "mode": "simulation"
     }
-  
+    
